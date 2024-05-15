@@ -81,10 +81,21 @@ const Scan: React.FC = () => {
           const response = await axios.post('https://web.theonecargo.com/api/upload', formData, config);
           return response.data.url;
         });
+
+        let test = "test"
   
         const urls = await Promise.all(uploadTasks);
         setUrlUpload(urls); 
         console.log("All uploaded URLs:", urls); 
+        
+        const formDataScan = {
+          id: scannedData,
+          code: test,
+          images: [urls]
+        }
+
+        const scanChina = await axios.put(`https://web.theonecargo.com/api/order/${scannedData}/scan/china`, formDataScan);
+        
         setImageUris([]);
         setModalVisible(false);
         Alert.alert("Upload Successful", "All images have been successfully uploaded.");
@@ -100,6 +111,8 @@ const Scan: React.FC = () => {
   const handleCloseModal = () => {
     setModalVisible(false);
     setImageUris([]);
+
+    console.log(scannedData);
   };
 
   return (
