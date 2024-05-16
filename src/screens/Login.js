@@ -24,19 +24,19 @@ const Login = () => {
   const handleLogin = async () => {
     if (username && password) {
       try {
-        const response = await axios.post('https://web.theonecargo.com/api/authentication/login', { username, password });
+        const response = await axios.post('https://dashboard.theonecargo.com/api/authentication/login', { username, password });
         await AsyncStorage.setItem("userToken", response.data.accessToken);
         navigation.navigate("ChooseStorage");
         console.log('Login suscess');
       } catch (error) {
         if (error.response && error.response.status === 400){
-          Alert.alert("Bad Request");
+          Alert.alert("Error","Bad Request");
         } else if(error.response && error.response.status === 401) {
-          Alert.alert("Invalid username or password");
+          Alert.alert("Error","Invalid username or password");
         } else if(error.response && error.response.status === 429) {
-          Alert.alert("Too many requests");
+          Alert.alert("Error","Too many requests");
         } else if(error.response && error.response.status === 500) {
-          Alert.alert("Internal Error");
+          Alert.alert("Error","Internal Error");
         }
       }
     } else {

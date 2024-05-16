@@ -8,13 +8,13 @@ const ChooseStorage = () => {
   const navigation = useNavigation();
 
   const handleThaiStoragePress = () => {
-    navigation.navigate('Scanner');
+    navigation.navigate('Scanner', { type: 'Thai' });
   };
-
+  
   const handleChinaStoragePress = () => {
-    navigation.navigate('Scanner');
+    navigation.navigate('Scanner', { type: 'China' });
   };
-
+  
   const handleLogout = async () => {
     try {
       await AsyncStorage.removeItem('userToken');

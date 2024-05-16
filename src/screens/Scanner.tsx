@@ -5,12 +5,24 @@ import { launchImageLibrary, ImageLibraryOptions } from 'react-native-image-pick
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import styles from '../ScanStyles';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+
 
 interface CompressResult {
   uri: string;
 }
 
+type ScannerRouteParams = {
+  Scanner: {
+    type: string;
+  };
+};
+
 const Scan: React.FC = () => {
+  const navigation = useNavigation();
+  const route = useRoute<RouteProp<ScannerRouteParams, 'Scanner'>>();
+  const { type } = route.params;
+
   const [scannedData, setScannedData] = useState<string>('No QR code detected');
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [imageUris, setImageUris] = useState<string[]>([]);
@@ -20,6 +32,8 @@ const Scan: React.FC = () => {
   const handleQRCodeScan = (data: string) => {
     setScannedData(data);
     setModalVisible(true);
+
+    console.log(type)
   };
 
   useEffect(() => {
@@ -34,7 +48,7 @@ const Scan: React.FC = () => {
       includeBase64: false,
       maxHeight: 1080,
       maxWidth: 1080,
-      selectionLimit: 4
+      selectionLimit: 10
     };
   
     launchImageLibrary(options, (response) => {
@@ -81,38 +95,67 @@ const Scan: React.FC = () => {
           const response = await axios.post('https://web.theonecargo.com/api/upload', formData, config);
           return response.data.url;
         });
-
-        let test = "test"
   
         const urls = await Promise.all(uploadTasks);
         setUrlUpload(urls); 
         console.log("All uploaded URLs:", urls); 
+  
+        let scanResponse;
+        let configScan = {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        };
+        if (type === "China") {
+          const formDataScan = {
+            code: scannedData,
+            images: urls
+          }
+  
+          scanResponse = await axios.post('https://dashboard.theonecargo.com/api/order/scan/china', formDataScan, configScan);
+          console.log("china scan");
+        } else if (type === "Thai") {
+          const formDataScan = {
+            code: scannedData,
+            images: urls
+          }
+  
+          scanResponse = await axios.post('https://dashboard.theonecargo.com/api/order/scan/thai', formDataScan, configScan);
+          console.log("Thai scan");
+        }
         
-        const formDataScan = {
-          id: scannedData,
-          code: test,
-          images: [urls]
+        if(scanResponse){
+          console.log("System message:", scanResponse.data.message);
+          Alert.alert("System message", `message : ${scanResponse.data.message}`);
         }
 
-        const scanChina = await axios.put(`https://web.theonecargo.com/api/order/${scannedData}/scan/china`, formDataScan);
-        
         setImageUris([]);
         setModalVisible(false);
-        Alert.alert("Upload Successful", "All images have been successfully uploaded.");
       } catch (error) {
-        console.error("Error uploading images:", error);
-        Alert.alert("Upload Failed", `Failed to upload images: ${error}`);
-      }
+        if (axios.isAxiosError(error)) {
+          if (error.response) {
+            const errorMessage = error.response.data && error.response.data.message ? error.response.data.message : 'Unknown error';
+            console.error("Error response data:", error.response.data);
+            Alert.alert("Error", `Request failed with status code ${error.response.status}: ${errorMessage}`);
+          } else if (error.request) {
+            console.error("Error request:", error.request);
+            Alert.alert("Error", "No response received from server.");
+          } else {
+            console.error("Error message:", error.message);
+            Alert.alert("Error", `Error: ${error.message}`);
+          }
+        } else {
+          console.error("Unexpected error:", error);
+          Alert.alert("Error", `Unexpected error: ${error}`);
+        }      }
     } else {
       Alert.alert("No Image Selected", "Please select at least one image.");
     }
-  };
+  };    
     
   const handleCloseModal = () => {
     setModalVisible(false);
     setImageUris([]);
-
-    console.log(scannedData);
   };
 
   return (
