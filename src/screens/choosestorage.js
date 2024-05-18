@@ -1,8 +1,7 @@
 import React from "react";
-import { Text, StyleSheet, Image, View, TouchableHighlight } from "react-native";
+import { Text, StyleSheet, Image, View, TouchableHighlight, TouchableOpacity } from "react-native";
 import { useNavigation } from '@react-navigation/native';
 import { Color, FontSize, FontFamily } from "../../GlobalStyles";
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ChooseStorage = () => {
   const navigation = useNavigation();
@@ -15,27 +14,18 @@ const ChooseStorage = () => {
     navigation.navigate('Scanner', { type: 'China' });
   };
   
-  const handleLogout = async () => {
-    try {
-      await AsyncStorage.removeItem('userToken');
-    
-      navigation.navigate('Login');
-    } catch (error) {
-      console.error('Error logging out:', error.message);
-    }
+  const handleBackToMenu = () => {
+    navigation.navigate('Menu');
   };
+
   return (
     <View style={styles.container}>
+      <TouchableOpacity style={styles.backButton} onPress={handleBackToMenu}>
+        <Text style={styles.backButtonText}>กลับไปที่เมนู</Text>
+      </TouchableOpacity>
       <View style={styles.header}>
         <Text style={styles.headerText}>เลือกคลังสินค้า</Text>
       </View>
-      <TouchableHighlight
-        style={styles.logoutButton}
-        underlayColor="transparent"
-        onPress={handleLogout}
-      >
-        <Text style={styles.logoutButtonText}>ออกจากระบบ</Text>
-      </TouchableHighlight>
       <View style={styles.frameParent}>
         <TouchableHighlight
           style={[styles.buttonWrapper, styles.buttonThaiWrapper]}
@@ -79,28 +69,30 @@ const styles = StyleSheet.create({
     backgroundColor: Color.colorPaleturquoise,
     paddingHorizontal: 20,
   },
+  backButton: {
+    position: 'absolute',
+    top: 40,
+    left: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    backgroundColor: Color.colorWhite,
+    borderRadius: 10,
+  },
+  backButtonText: {
+    fontSize: FontSize.size_3xs,
+    fontFamily: FontFamily.interRegular,
+    color: Color.colorBlack,
+  },
   header: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
     width: "100%",
     marginBottom: 20,
     paddingHorizontal: 10,
   },
   headerText: {
     fontSize: 20,
-    fontFamily: FontFamily.interRegular,
-    color: Color.colorBlack,
-  },
-  logoutButton: {
-    position: "absolute",
-    top: 20, // ระยะห่างจากด้านบนของหน้าจอ
-    right: 20, // ระยะห่างจากด้านขวาของหน้าจอ
-    padding: 10,
-    backgroundColor: Color.colorWhite,
-    borderRadius: 5,
-  },
-  logoutButtonText: {
-    fontSize: FontSize.size_3xs,
     fontFamily: FontFamily.interRegular,
     color: Color.colorBlack,
   },

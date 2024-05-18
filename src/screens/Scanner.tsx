@@ -208,13 +208,14 @@ const Scan: React.FC = () => {
                 </TouchableOpacity>
               )}
             </ScrollView>
-            <View style={styles.inputContainer}>
+            <View style={styles.inputContainer}>  
               <TextInput
                 style={styles.inputnote}
                 placeholder="หมายเหตุ"
                 placeholderTextColor="#000"
                 value={note}
                 onChangeText={setNote}
+                multiline
               />
             </View>
             <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
