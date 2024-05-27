@@ -15,12 +15,14 @@ const Addproduct = () => {
   const [imageMain, setImageMain] = useState<string | null>(null);
   const [productName, setProductName] = useState<string>('');
   const [productDetails, setProductDetails] = useState<string>('');
+  const [productPrice, setProductPrice] = useState<number | null>(null);
 
   const resetFields = (): void => {
     setImageUris([]);
     setImageMain(null);
     setProductName('');
     setProductDetails('');
+    setProductPrice(null);
   };
 
   useEffect(() => {
@@ -36,6 +38,14 @@ const Addproduct = () => {
   const handleSetProductDetails = (details: string) => {
     setProductDetails(details.trim());
   };
+
+  const handleSetProductPrice = (productPice : string) => {
+    
+    const numericText = productPice.replace(/[^0-9]/g, '');
+    const numericValue = numericText ? Number(numericText) : null;
+    setProductPrice(numericValue);
+  };
+
 
   const handleMainImagePick = (): void => {
     const options: ImageLibraryOptions = {
@@ -110,7 +120,7 @@ const Addproduct = () => {
         uri,
       } as any);
 
-      const response = await axios.post('https://web.theonecargo.com/api/upload', formData, config);
+      const response = await axios.post('https://stg-dashboard.theonecargo.com/api/upload', formData, config);
       return response.data.url;
     };
 
@@ -145,9 +155,10 @@ const Addproduct = () => {
             description: productDetails,
             image: mainImageUrl,
             images: imageUrls,
+            price: productPrice
           };
 
-          await axios.post('https://dashboard.theonecargo.com/api/product/missing', formDataProduct, configProduct);
+          await axios.post('https://stg-dashboard.theonecargo.com/api/product/missing', formDataProduct, configProduct);
 
           resetFields();
 
@@ -226,6 +237,15 @@ const Addproduct = () => {
             value={productDetails}
             onChangeText={handleSetProductDetails}
             style={[styles.textInput, styles.multilineInput]}
+          />
+
+          <TextInput
+            placeholder="ราคาสินค้า"
+            placeholderTextColor="gray"
+            value={productPrice !== null ? String(productPrice) : ''}
+            onChangeText={handleSetProductPrice}
+            style={styles.textInput}
+            keyboardType="numeric" 
           />
         </View>
 

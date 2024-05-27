@@ -92,7 +92,7 @@ const Scan: React.FC = () => {
             uri: uri,
           });
   
-          const response = await axios.post('https://web.theonecargo.com/api/upload', formData, config);
+          const response = await axios.post('https://stg-dashboard.theonecargo.com/api/upload', formData, config);
           return response.data.url;
         });
   
@@ -112,7 +112,7 @@ const Scan: React.FC = () => {
             images: urls
           }
   
-          scanResponse = await axios.post('https://dashboard.theonecargo.com/api/order/scan/china', formDataScan, configScan);
+          scanResponse = await axios.post('https://stg-dashboard.theonecargo.com/api/order/scan/china', formDataScan, configScan);
           console.log("china scan");
         } else if (type === "Thai") {
           const formDataScan = {
@@ -120,7 +120,7 @@ const Scan: React.FC = () => {
             images: urls
           }
   
-          scanResponse = await axios.post('https://dashboard.theonecargo.com/api/order/scan/thai', formDataScan, configScan);
+          scanResponse = await axios.post('https://stg-dashboard.theonecargo.com/api/order/scan/thai', formDataScan, configScan);
           console.log("Thai scan");
         }
         

@@ -24,7 +24,7 @@ const Login = () => {
   const handleLogin = async () => {
     if (username && password) {
       try {
-        const response = await axios.post('https://dashboard.theonecargo.com/api/authentication/login', { username, password });
+        const response = await axios.post('https://stg-dashboard.theonecargo.com/api/authentication/login', { username, password });
         await AsyncStorage.setItem("userToken", response.data.accessToken);
         navigation.navigate("Menu");
         console.log('Login suscess');
