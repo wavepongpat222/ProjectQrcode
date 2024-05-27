@@ -139,7 +139,7 @@ const Addproduct = () => {
       Alert.alert('Upload Failed', 'No token available');
       return;
     }
-    if (productName && productDetails) {
+    if (productName && productDetails && productPrice) {
       if (imageMain && imageUris.length > 0) {
         try {
           const { mainImageUrl, imageUrls } = await uploadImage(imageUris, imageMain, token);

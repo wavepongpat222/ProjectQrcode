@@ -54,9 +54,6 @@ const Login = () => {
       <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
         <Text style={styles.buttonText}>Login</Text>
       </TouchableOpacity>
-      <TouchableOpacity onPress={() => navigation.navigate("Register")} style={styles.registerLink}>
-        <Text style={styles.registerText}>Don't have an account? Register here!</Text>
-      </TouchableOpacity>
     </View>
   );
 };
