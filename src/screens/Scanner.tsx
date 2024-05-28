@@ -6,7 +6,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import styles from '../ScanStyles';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
-
+import { CheckBox } from 'react-native-elements';
 
 interface CompressResult {
   uri: string;
@@ -27,8 +27,25 @@ const Scan: React.FC = () => {
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [imageUris, setImageUris] = useState<string[]>([]);
   const [urlUpload, setUrlUpload] = useState<string[]>([]);
-  const [note, setNote] = useState("");
+  const [Fweight, setWeight] = useState<number | null>(null);
+  const [Fwidth, setWidth] = useState<number | null>(null);
+  const [Fheight, setHeight] = useState<number | null>(null);
+  const [Flength, setLength] = useState<number | null>(null);
+  const [FcontainerNumber, setContainerNumber] = useState<string | null>(null);
+  const [Fqc, setQc] = useState<number | null>(null);
+  const [Fbox, setBox] = useState<number | null>(null);
+  const [Fnote, setNote] = useState<string | null>(null);
+  
+  const [qcChecked, setQcChecked] = useState(false);
+  const [tilangChecked, setTilangChecked] = useState(false);
 
+  const getOption = () => {
+    let values = [];
+    if (qcChecked) values.push('xx');
+    if (tilangChecked) values.push('xx');
+    return values.join(', ');
+  };
+  
   const handleQRCodeScan = (data: string) => {
     setScannedData(data);
     setModalVisible(true);
@@ -36,11 +53,26 @@ const Scan: React.FC = () => {
     console.log(type)
   };
 
+  const resetFields = (): void => {
+    setImageUris([]);
+    setWeight(null);
+    setWidth(null);
+    setHeight(null);
+    setLength(null);
+    setContainerNumber('');
+    setQc(null);
+    setBox(null);
+    setNote('');
+    setQcChecked(false);
+    setTilangChecked(false);
+  };
+
   useEffect(() => {
     return () => {
-      setImageUris([]);
+      resetFields();
     };
   }, []);
+
 
   const handleImagePick = () => {
     const options: ImageLibraryOptions = {
@@ -107,17 +139,31 @@ const Scan: React.FC = () => {
           }
         };
         if (type === "China") {
-          const formDataScan = {
-            code: scannedData,
-            images: urls
+          let Foption = getOption();
+
+          if(Fweight && Fwidth && Fheight && Flength && FcontainerNumber && Fbox && Fqc && Foption && Fnote) {
+            
+            const formDataScan = {
+              code: scannedData,
+              images: urls,
+              weight: Fweight,
+              width: Fwidth,
+              height: Fheight,
+              length: Flength,
+              containerNumber: FcontainerNumber,
+              box: Fbox,
+              qc: Fqc,
+              option: Foption,
+              remark: Fnote
+            }
+    
+            scanResponse = await axios.post('https://stg-dashboard.theonecargo.com/api/order/scan/china', formDataScan, configScan);
+            console.log("china scan");
           }
-  
-          scanResponse = await axios.post('https://stg-dashboard.theonecargo.com/api/order/scan/china', formDataScan, configScan);
-          console.log("china scan");
         } else if (type === "Thai") {
           const formDataScan = {
             code: scannedData,
-            images: urls
+            images: urls,
           }
   
           scanResponse = await axios.post('https://stg-dashboard.theonecargo.com/api/order/scan/thai', formDataScan, configScan);
@@ -131,6 +177,7 @@ const Scan: React.FC = () => {
 
         setImageUris([]);
         setModalVisible(false);
+        resetFields();
       } catch (error) {
         if (axios.isAxiosError(error)) {
           if (error.response) {
@@ -156,6 +203,7 @@ const Scan: React.FC = () => {
   const handleCloseModal = () => {
     setModalVisible(false);
     setImageUris([]);
+    resetFields();
   };
 
   return (
@@ -180,49 +228,210 @@ const Scan: React.FC = () => {
           cameraStyle={styles.cameraSize}
           containerStyle={styles.cameraContainer}
         />
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={modalVisible}
-          onRequestClose={handleCloseModal}
-        >
-          <View style={styles.modalView}>
-            <TouchableOpacity style={styles.closeButton} onPress={handleCloseModal}>
-              <Text style={styles.closeButtonText}>X</Text>
-            </TouchableOpacity>
-            <Text style={styles.modalText}>{scannedData}</Text> 
-            <ScrollView contentContainerStyle={styles.imagePreviewContainer} horizontal>
-              {imageUris.map((uri, index) => (
-                <TouchableOpacity key={index} onPress={() => handleRemoveImage(index)}>
-                  <RNImage
-                    source={{ uri }}
-                    style={styles.imagePreview}
-                  />
-                </TouchableOpacity>
-              ))}
-              {imageUris.length === 0 && (
-                <TouchableOpacity style={styles.ImagePick} onPress={handleImagePick}>
-                  <RNImage
-                    source={require("../../assets/addpic.png")}
-                  />
-                </TouchableOpacity>
-              )}
-            </ScrollView>
-            <View style={styles.inputContainer}>  
-              <TextInput
-                style={styles.inputnote}
-                placeholder="หมายเหตุ"
-                placeholderTextColor="#000"
-                value={note}
-                onChangeText={setNote}
-                multiline
-              />
+
+          {type === "China" ? (
+            <Modal
+            animationType="slide"
+            transparent={true}
+            visible={modalVisible}
+            onRequestClose={handleCloseModal}
+          >
+            <View style={styles.modalViewChina}>
+              <TouchableOpacity style={styles.closeButton} onPress={handleCloseModal}>
+                <Text style={styles.closeButtonText}>X</Text>
+              </TouchableOpacity>
+              <Text style={styles.modalText}>{scannedData}</Text>
+              <ScrollView contentContainerStyle={styles.imagePreviewContainer} horizontal>
+                {imageUris.map((uri, index) => (
+                  <TouchableOpacity key={index} onPress={() => handleRemoveImage(index)}>
+                    <RNImage
+                      source={{ uri }}
+                      style={styles.imagePreview}
+                    />
+                  </TouchableOpacity>
+                ))}
+                {imageUris.length === 0 && (
+                  <TouchableOpacity style={styles.ImagePick} onPress={handleImagePick}>
+                    <RNImage
+                      source={require("../../assets/addpic.png")}
+                    />
+                  </TouchableOpacity>
+                )}
+              </ScrollView>
+
+        <Text style={styles.additionalLabel}>เลือกค่าเพิ่มเติม</Text>  
+        <View style={styles.checkboxContainer}>
+          <CheckBox
+            title="QC"
+            checked={qcChecked}
+            onPress={() => setQcChecked(!qcChecked)}
+            containerStyle={styles.checkbox}
+            textStyle={styles.checkboxText}
+            checkedIcon={
+              <View style={styles.checkedIcon}>
+                <Text style={styles.iconText}>✔</Text>
+              </View>
+            }
+            uncheckedIcon={<View style={styles.uncheckedIcon} />}
+          />
+          <CheckBox
+            title="ตีลัง"
+            checked={tilangChecked}
+            onPress={() => setTilangChecked(!tilangChecked)}
+            containerStyle={styles.checkbox}
+            textStyle={styles.checkboxText}
+            checkedIcon={
+              <View style={styles.checkedIcon}>
+                <Text style={styles.iconText}>✔</Text>
+              </View>
+            }
+            uncheckedIcon={<View style={styles.uncheckedIcon} />}
+          />
+        </View>
+
+
+        <View style={styles.dimensionInputContainer}>
+        <View style={styles.dimensionInputWrapper}>
+          <TextInput
+            style={styles.dimensionInput}
+            placeholder="กว้าง (เซนติเมตร)"
+            placeholderTextColor="#000"
+            value={Fwidth ? Fwidth.toString() : ''}
+            onChangeText={(text) => setWidth(parseFloat(text))}
+            keyboardType="numeric"
+          />
+        </View>
+        <View style={styles.dimensionInputWrapper}>
+          <TextInput
+            style={styles.dimensionInput}
+            placeholder="ยาว (เซนติเมตร)"
+            placeholderTextColor="#000"
+            value={Flength ? Flength.toString() : ''}
+            onChangeText={(text) => setLength(parseFloat(text))}
+            keyboardType="numeric"
+          />
+        </View>
+      </View>
+      <View style={styles.dimensionInputContainer}>
+        <View style={styles.dimensionInputWrapper}>
+          <TextInput
+            style={styles.dimensionInput}
+            placeholder="สูง (เซนติเมตร)"
+            placeholderTextColor="#000"
+            value={Fheight ? Fheight.toString() : ''}
+            onChangeText={(text) => setHeight(parseFloat(text))}
+            keyboardType="numeric"
+          />
+        </View>
+        <View style={styles.dimensionInputWrapper}>
+          <TextInput
+            style={styles.dimensionInput}
+            placeholder="น้ำหนัก (กิโลกรัม)"
+            placeholderTextColor="#000"
+            value={Fweight ? Fweight.toString() : ''}
+            onChangeText={(text) => setWeight(parseFloat(text))}
+            keyboardType="numeric"
+          />
+        </View>
+      </View>
+      <View style={styles.dimensionInputContainer}>
+        <View style={styles.dimensionInputWrapper}>
+          <TextInput
+            style={styles.dimensionInput}
+            placeholder="ค่า QC"
+            placeholderTextColor="#000"
+            value={Fqc ? Fqc.toString() : ''}
+            onChangeText={(text) => setQc(parseFloat(text))}
+            keyboardType="numeric"
+          />
+        </View>
+        <View style={styles.dimensionInputWrapper}>
+          <TextInput
+            style={styles.dimensionInput}
+            placeholder="ค่า ตีลัง"
+            placeholderTextColor="#000"
+            value={Fbox ? Fbox.toString() : ''}
+            onChangeText={(text) => setBox(parseFloat(text))}
+            keyboardType="numeric"
+          />
+        </View>
+      </View>
+      <View style={styles.dimensionInputContainer}>
+        <View style={styles.dimensionInputWrapper}>
+          <TextInput
+            style={styles.dimensionInput}
+            placeholder="หมายเลขตู้"
+            placeholderTextColor="#000"
+            value={FcontainerNumber ? FcontainerNumber.toString() : ''}
+            onChangeText={(text) => setContainerNumber(text)}
+          />
+        </View>
+      </View>
+      <View style={styles.dimensionInputContainer}>
+        <View style={styles.dimensionInputWrapper}>        
+        <TextInput
+            style={styles.dimensionInput2}
+            placeholder="หมายเหตุ"
+            placeholderTextColor="#000"
+            value={Fnote !== null ? Fnote : ''}
+            onChangeText={setNote}
+            multiline={true} 
+          />
+        </View>
+      </View>
+
+     <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+       <Text style={styles.submitButtonText}>ตกลง</Text>
+     </TouchableOpacity>
+   </View>
+ </Modal>        
+            
+          ) : type === "Thai" ? (
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={modalVisible}
+            onRequestClose={handleCloseModal}
+          >
+            <View style={styles.modalView}>
+              <TouchableOpacity style={styles.closeButton} onPress={handleCloseModal}>
+                <Text style={styles.closeButtonText}>X</Text>
+              </TouchableOpacity>
+              <Text style={styles.modalText}>{scannedData}</Text> 
+              <ScrollView contentContainerStyle={styles.imagePreviewContainer2} horizontal>
+                {imageUris.map((uri, index) => (
+                  <TouchableOpacity key={index} onPress={() => handleRemoveImage(index)}>
+                    <RNImage
+                      source={{ uri }}
+                      style={styles.imagePreview}
+                    />
+                  </TouchableOpacity>
+                ))}
+                {imageUris.length === 0 && (
+                  <TouchableOpacity style={styles.ImagePick} onPress={handleImagePick}>
+                    <RNImage
+                      source={require("../../assets/addpic.png")}
+                    />
+                  </TouchableOpacity>
+                )}
+              </ScrollView>
+              <View style={styles.inputContainer}>  
+                <TextInput
+                    style={styles.inputnote}
+                    placeholder="หมายเหตุ"
+                    placeholderTextColor="#000"
+                    value={Fnote !== null ? Fnote : ''}
+                    onChangeText={setNote}
+                    multiline
+                />
+              </View>
+              <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+                <Text style={styles.submitButtonText}>ตกลง</Text>
+              </TouchableOpacity>
             </View>
-            <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-              <Text style={styles.submitButtonText}>ตกลง</Text>
-            </TouchableOpacity>
-          </View>
-        </Modal>
+          </Modal>
+            ) : null}
+
       </View>
       <RNImage
         style={styles.scanChild}

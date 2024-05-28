@@ -104,9 +104,10 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
-    top: heightPercent(-6.25),
+    top: heightPercent(0),
     width: widthPercent(30),
     height: heightPercent(5),
+    zIndex: 2
   },
   submitButtonText:{
     fontSize: widthPercent(4),
@@ -117,7 +118,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#e3e3e3',
     width: widthPercent(60),
     height:heightPercent(10),
-    top : heightPercent(-11),
+    top : heightPercent(-2),
     borderRadius: 5,
   },
   inputnote: {
@@ -126,6 +127,7 @@ const styles = StyleSheet.create({
     color: '#000',
     textAlignVertical: 'top',
     padding: 10,
+    // borderColor: '#ccc',
   },
   icon: {
     width: widthPercent(5),
@@ -139,14 +141,106 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'center',
-    marginTop: heightPercent(2.5),
+    marginTop: heightPercent(-1.5),
+  },
+  imagePreviewContainer2: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    marginTop: heightPercent(7),
   },
   imagePreview: {
     width: widthPercent(25),
     height: heightPercent(12.5),
     margin: widthPercent(2.5),
     borderRadius: 5,
-  }
+  },
+  modalViewChina: {
+    margin: widthPercent(5),
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: widthPercent(5),
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: heightPercent(0.25)
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: widthPercent(1),
+    elevation: 5,
+    marginTop: '30%',
+    height: heightPercent(85),
+    width: widthPercent(83),
+    left: widthPercent(4),
+    top: heightPercent(-5)
+  },
+  
+  checkboxContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: heightPercent(2)
+  },
+  checkbox: {
+    backgroundColor: 'transparent',
+    borderWidth: 0,
+  },
+  checkboxText: {
+    fontSize: 16,
+    color: '#000',
+  },
+  uncheckedIcon: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: '#000',
+  },
+  checkedIcon: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: 'green',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  iconText: {
+    color: '#fff',
+    fontSize: 16,
+  },
+  additionalLabel: {
+    fontSize: 16,
+    color: '#000',
+  },
+  dimensionInputContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginVertical: heightPercent(-1),
+    marginBottom: heightPercent(2),
+    
+    transform: [{ translateY: -10 }]
+  },
+  dimensionInput2: {
+    height: heightPercent(15), 
+    borderWidth: 1,
+    borderColor: '#ccc',
+    paddingHorizontal: 10,
+    textAlignVertical: 'top',
+    color: '#000'
+  },
+
+  dimensionInput: {
+    padding: 8,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 5,
+    color: '#000',
+  },
+  dimensionInputWrapper: {
+    flex: 1,
+    marginHorizontal: widthPercent(1.5),
+  },
+
 });
 
 export default styles;
