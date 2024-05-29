@@ -10,6 +10,15 @@ const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
+
+  const handleSetUername = (username) => {
+    setUsername(username.trim());
+  };
+
+  const handleSetPassword = (password) => {
+    setPassword(password.trim());
+  };
+
   useEffect(() => {
     const checkToken = async () => {
       const token = await AsyncStorage.getItem("userToken");
@@ -48,8 +57,8 @@ const Login = () => {
     <View style={styles.container}>
       <Image style={styles.logo} resizeMode="contain" source={require("../../assets/logo.png")} />
       <View style={styles.inputContainer}>
-        <TextInput style={styles.input} placeholder="Username" placeholderTextColor="#888" value={username} onChangeText={setUsername} />
-        <TextInput style={styles.input} placeholder="Password" placeholderTextColor="#888" secureTextEntry value={password} onChangeText={setPassword} />
+        <TextInput style={styles.input} placeholder="Username" placeholderTextColor="#888" value={username} onChangeText={handleSetUername} />
+        <TextInput style={styles.input} placeholder="Password" placeholderTextColor="#888" secureTextEntry value={password} onChangeText={handleSetPassword} />
       </View>
       <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
         <Text style={styles.buttonText}>Login</Text>

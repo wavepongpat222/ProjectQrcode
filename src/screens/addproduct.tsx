@@ -172,7 +172,7 @@ const Addproduct = () => {
         Alert.alert('No Image Selected', 'Please select at least one main image and additional images.');
       }
     } else {
-      Alert.alert('Incomplete information', 'Please fill in the product name and complete description.');
+      Alert.alert('Incomplete information', 'Please fill in all information.');
     }
   };
 
