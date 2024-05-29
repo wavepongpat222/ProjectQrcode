@@ -24,7 +24,7 @@ const Scan: React.FC = () => {
   const { type } = route.params;
 
   const [scannedData, setScannedData] = useState<string>('No QR code detected');
-  const [modalVisible, setModalVisible] = useState<boolean>(false);
+  const [modalVisible, setModalVisible] = useState<boolean>(true);
   const [imageUris, setImageUris] = useState<string[]>([]);
   const [urlUpload, setUrlUpload] = useState<string[]>([]);
   const [Fweight, setWeight] = useState<number | null>(null);
@@ -73,6 +73,46 @@ const Scan: React.FC = () => {
     };
   }, []);
 
+  const UploadImage = async () => {
+
+    const token = await AsyncStorage.getItem("userToken");
+    if (!token) {
+      Alert.alert("Upload Failed", "No token available");
+      return;
+    }
+
+    const config = {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        'Authorization': `Bearer ${token}`
+      }
+    };
+
+    const uploadTasks = imageUris.map(async (uri) => {
+      const formData = new FormData();
+      formData.append('file', {
+        name: 'upload.jpg',
+        type: 'image/jpeg',
+        uri: uri,
+      });
+
+      const response = await axios.post('https://stg-dashboard.theonecargo.com/api/upload', formData, config);
+      return response.data.url;
+    });
+
+    try {
+      const urls = await Promise.all(uploadTasks);
+      setUrlUpload(urls);
+      console.log("All uploaded URLs:", urls);
+      return urls;  // Return URLs after upload
+    } catch (error) {
+      Alert.alert("Upload Failed", "An error occurred during upload");
+      console.error("Upload error:", error);
+      return [];
+    }
+  }
+    
+
 
   const handleImagePick = () => {
     const options: ImageLibraryOptions = {
@@ -106,46 +146,24 @@ const Scan: React.FC = () => {
       Alert.alert("Upload Failed", "No token available");
       return;
     }
-  
+    
     if (imageUris.length > 0) {
-      const config = {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          'Authorization': `Bearer ${token}`
-        }
-      };
-  
       try {
-        const uploadTasks = imageUris.map(async (uri) => {
-          const formData = new FormData();
-          formData.append('file', {
-            name: 'upload.jpg',
-            type: 'image/jpeg',
-            uri: uri,
-          });
-  
-          const response = await axios.post('https://stg-dashboard.theonecargo.com/api/upload', formData, config);
-          return response.data.url;
-        });
-  
-        const urls = await Promise.all(uploadTasks);
-        setUrlUpload(urls); 
-        console.log("All uploaded URLs:", urls); 
-  
+        const uploadedUrls = await UploadImage();
         let scanResponse;
         let configScan = {
           headers: {
             'Authorization': `Bearer ${token}`
           }
         };
-        if (type === "China") {
+  
+        if (type === "China") { 
           let Foption = getOption();
-
-          if(Fweight && Fwidth && Fheight && Flength && FcontainerNumber && Fbox && Fqc && Foption && Fnote) {
-            
+  
+          if (Fweight && Fwidth && Fheight && Flength && FcontainerNumber && Fbox && Fqc && Foption && Fnote) {
             const formDataScan = {
               code: scannedData,
-              images: urls,
+              images: uploadedUrls,
               weight: Fweight,
               width: Fwidth,
               height: Fheight,
@@ -155,26 +173,30 @@ const Scan: React.FC = () => {
               qc: Fqc,
               option: Foption,
               remark: Fnote
-            }
-    
+            };
+  
             scanResponse = await axios.post('https://stg-dashboard.theonecargo.com/api/order/scan/china', formDataScan, configScan);
             console.log("china scan");
+          } else {
+            Alert.alert("System message", "Please fill in all information");
+            setModalVisible(true);
+            return;
           }
         } else if (type === "Thai") {
           const formDataScan = {
             code: scannedData,
-            images: urls,
-          }
+            images: uploadedUrls,
+          };
   
           scanResponse = await axios.post('https://stg-dashboard.theonecargo.com/api/order/scan/thai', formDataScan, configScan);
           console.log("Thai scan");
         }
-        
-        if(scanResponse){
+  
+        if (scanResponse) {
           console.log("System message:", scanResponse.data.message);
           Alert.alert("System message", `message : ${scanResponse.data.message}`);
         }
-
+  
         setImageUris([]);
         setModalVisible(false);
         resetFields();
@@ -194,11 +216,15 @@ const Scan: React.FC = () => {
         } else {
           console.error("Unexpected error:", error);
           Alert.alert("Error", `Unexpected error: ${error}`);
-        }      }
+        }
+        setModalVisible(true);
+      }
     } else {
       Alert.alert("No Image Selected", "Please select at least one image.");
+      setModalVisible(true);
     }
-  };    
+  };
+      
     
   const handleCloseModal = () => {
     setModalVisible(false);

@@ -135,13 +135,17 @@ const styles = StyleSheet.create({
     marginRight: widthPercent(1.25),
   },
   ImagePick:{
-    top: heightPercent(6.25)
+    top: heightPercent(6.25),
+    height: heightPercent(10)
   },
   imagePreviewContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'center',
     marginTop: heightPercent(-1.5),
+    // width:widthPercent(5)
+    height: heightPercent(13),
+    
   },
   imagePreviewContainer2: {
     flexDirection: 'row',
@@ -190,16 +194,16 @@ const styles = StyleSheet.create({
     color: '#000',
   },
   uncheckedIcon: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
+    width: widthPercent(5), 
+    height: heightPercent(2.5), 
+    borderRadius: widthPercent(3), 
     borderWidth: 2,
     borderColor: '#000',
   },
   checkedIcon: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
+    width: widthPercent(5),
+    height: heightPercent(2.5),
+    borderRadius: widthPercent(3),
     backgroundColor: 'green',
     justifyContent: 'center',
     alignItems: 'center',
@@ -211,6 +215,7 @@ const styles = StyleSheet.create({
   additionalLabel: {
     fontSize: 16,
     color: '#000',
+    
   },
   dimensionInputContainer: {
     flexDirection: 'row',
@@ -218,13 +223,13 @@ const styles = StyleSheet.create({
     marginVertical: heightPercent(-1),
     marginBottom: heightPercent(2),
     
-    transform: [{ translateY: -10 }]
+    transform: [{ translateY: heightPercent(0) }]
   },
   dimensionInput2: {
     height: heightPercent(15), 
     borderWidth: 1,
     borderColor: '#ccc',
-    paddingHorizontal: 10,
+    paddingHorizontal: heightPercent(1),
     textAlignVertical: 'top',
     color: '#000'
   },
