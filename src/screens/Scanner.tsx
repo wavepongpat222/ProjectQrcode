@@ -24,7 +24,7 @@ const Scan: React.FC = () => {
   const { type } = route.params;
 
   const [scannedData, setScannedData] = useState<string>('No QR code detected');
-  const [modalVisible, setModalVisible] = useState<boolean>(true);
+  const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [imageUris, setImageUris] = useState<string[]>([]);
   const [urlUpload, setUrlUpload] = useState<string[]>([]);
   const [Fweight, setWeight] = useState<number | null>(null);
@@ -73,6 +73,14 @@ const Scan: React.FC = () => {
     };
   }, []);
 
+  const handleSetContainerNumber = (FcontainerNumber: string) => {
+    setContainerNumber(FcontainerNumber.trim());
+  };
+
+  const handleSetNote = (Fnote: string) => {
+    setNote(Fnote.trim());
+  };
+
   const UploadImage = async () => {
 
     const token = await AsyncStorage.getItem("userToken");
@@ -104,7 +112,7 @@ const Scan: React.FC = () => {
       const urls = await Promise.all(uploadTasks);
       setUrlUpload(urls);
       console.log("All uploaded URLs:", urls);
-      return urls;  // Return URLs after upload
+      return urls;  
     } catch (error) {
       Alert.alert("Upload Failed", "An error occurred during upload");
       console.error("Upload error:", error);
@@ -193,7 +201,6 @@ const Scan: React.FC = () => {
         }
   
         if (scanResponse) {
-          console.log("System message:", scanResponse.data.message);
           Alert.alert("System message", `message : ${scanResponse.data.message}`);
         }
   
@@ -204,17 +211,13 @@ const Scan: React.FC = () => {
         if (axios.isAxiosError(error)) {
           if (error.response) {
             const errorMessage = error.response.data && error.response.data.message ? error.response.data.message : 'Unknown error';
-            console.error("Error response data:", error.response.data);
-            Alert.alert("Error", `Request failed with status code ${error.response.status}: ${errorMessage}`);
+            Alert.alert("Error", `${errorMessage}`);
           } else if (error.request) {
-            console.error("Error request:", error.request);
             Alert.alert("Error", "No response received from server.");
           } else {
-            console.error("Error message:", error.message);
             Alert.alert("Error", `Error: ${error.message}`);
           }
         } else {
-          console.error("Unexpected error:", error);
           Alert.alert("Error", `Unexpected error: ${error}`);
         }
         setModalVisible(true);
@@ -256,162 +259,161 @@ const Scan: React.FC = () => {
         />
 
           {type === "China" ? (
-            <Modal
+          <Modal
             animationType="slide"
             transparent={true}
             visible={modalVisible}
             onRequestClose={handleCloseModal}
           >
-            <View style={styles.modalViewChina}>
-              <TouchableOpacity style={styles.closeButton} onPress={handleCloseModal}>
-                <Text style={styles.closeButtonText}>X</Text>
+              <View style={styles.modalViewChina}>
+                <TouchableOpacity style={styles.closeButton} onPress={handleCloseModal}>
+                  <Text style={styles.closeButtonText}>X</Text>
+                </TouchableOpacity>
+                <Text style={styles.modalText}>{scannedData}</Text>
+                <ScrollView contentContainerStyle={styles.imagePreviewContainer} horizontal>
+                  {imageUris.map((uri, index) => (
+                    <TouchableOpacity key={index} onPress={() => handleRemoveImage(index)}>
+                      <RNImage
+                        source={{ uri }}
+                        style={styles.imagePreview}
+                      />
+                    </TouchableOpacity>
+                  ))}
+                  {imageUris.length === 0 && (
+                    <TouchableOpacity style={styles.ImagePick} onPress={handleImagePick}>
+                      <RNImage
+                        source={require("../../assets/addpic.png")}
+                      />
+                    </TouchableOpacity>
+                  )}
+                </ScrollView>
+
+                <Text style={styles.additionalLabel}>เลือกค่าเพิ่มเติม</Text>  
+                <View style={styles.checkboxContainer}>
+                  <CheckBox
+                    title="QC"
+                    checked={qcChecked}
+                    onPress={() => setQcChecked(!qcChecked)}
+                    containerStyle={styles.checkbox}
+                    textStyle={styles.checkboxText}
+                    checkedIcon={
+                      <View style={styles.checkedIcon}>
+                        <Text style={styles.iconText}>✔</Text>
+                      </View>
+                    }
+                    uncheckedIcon={<View style={styles.uncheckedIcon} />}
+                  />
+                  <CheckBox
+                    title="ตีลัง"
+                    checked={tilangChecked}
+                    onPress={() => setTilangChecked(!tilangChecked)}
+                    containerStyle={styles.checkbox}
+                    textStyle={styles.checkboxText}
+                    checkedIcon={
+                      <View style={styles.checkedIcon}>
+                        <Text style={styles.iconText}>✔</Text>
+                      </View>
+                    }
+                    uncheckedIcon={<View style={styles.uncheckedIcon} />}
+                  />
+                </View>
+
+                  <View style={styles.dimensionInputContainer}>
+                  <View style={styles.dimensionInputWrapper}>
+                    <TextInput
+                      style={styles.dimensionInput}
+                      placeholder="กว้าง (เซนติเมตร)"
+                      placeholderTextColor="#000"
+                      value={Fwidth ? Fwidth.toString() : ''}
+                      onChangeText={(text) => setWidth(parseFloat(text))}
+                      keyboardType="numeric"
+                    />
+                  </View>
+                  <View style={styles.dimensionInputWrapper}>
+                    <TextInput
+                      style={styles.dimensionInput}
+                      placeholder="ยาว (เซนติเมตร)"
+                      placeholderTextColor="#000"
+                      value={Flength ? Flength.toString() : ''}
+                      onChangeText={(text) => setLength(parseFloat(text))}
+                      keyboardType="numeric"
+                    />
+                  </View>
+                </View>
+                <View style={styles.dimensionInputContainer}>
+                  <View style={styles.dimensionInputWrapper}>
+                    <TextInput
+                      style={styles.dimensionInput}
+                      placeholder="สูง (เซนติเมตร)"
+                      placeholderTextColor="#000"
+                      value={Fheight ? Fheight.toString() : ''}
+                      onChangeText={(text) => setHeight(parseFloat(text))}
+                      keyboardType="numeric"
+                    />
+                  </View>
+                  <View style={styles.dimensionInputWrapper}>
+                    <TextInput
+                      style={styles.dimensionInput}
+                      placeholder="น้ำหนัก (กิโลกรัม)"
+                      placeholderTextColor="#000"
+                      value={Fweight ? Fweight.toString() : ''}
+                      onChangeText={(text) => setWeight(parseFloat(text))}
+                      keyboardType="numeric"
+                    />
+                  </View>
+                </View>
+                <View style={styles.dimensionInputContainer}>
+                  <View style={styles.dimensionInputWrapper}>
+                    <TextInput
+                      style={styles.dimensionInput}
+                      placeholder="ค่า QC"
+                      placeholderTextColor="#000"
+                      value={Fqc ? Fqc.toString() : ''}
+                      onChangeText={(text) => setQc(parseFloat(text))}
+                      keyboardType="numeric"
+                    />
+                  </View>
+                  <View style={styles.dimensionInputWrapper}>
+                    <TextInput
+                      style={styles.dimensionInput}
+                      placeholder="ค่า ตีลัง"
+                      placeholderTextColor="#000"
+                      value={Fbox ? Fbox.toString() : ''}
+                      onChangeText={(text) => setBox(parseFloat(text))}
+                      keyboardType="numeric"
+                    />
+                  </View>
+                </View>
+                <View style={styles.dimensionInputContainer}>
+                  <View style={styles.dimensionInputWrapper}>
+                    <TextInput
+                      style={styles.dimensionInput}
+                      placeholder="หมายเลขตู้"
+                      placeholderTextColor="#000"
+                      value={FcontainerNumber ? FcontainerNumber.toString() : ''}
+                      onChangeText={handleSetContainerNumber}
+                    />
+                  </View>
+                </View>
+                <View style={styles.dimensionInputContainer}>
+                  <View style={styles.dimensionInputWrapper}>        
+                  <TextInput
+                      style={styles.dimensionInput2}
+                      placeholder="หมายเหตุ"
+                      placeholderTextColor="#000"
+                      value={Fnote !== null ? Fnote : ''}
+                      onChangeText={handleSetNote}
+                      multiline={true} 
+                    />
+                  </View>
+                </View>
+
+              <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+                <Text style={styles.submitButtonText}>ตกลง</Text>
               </TouchableOpacity>
-              <Text style={styles.modalText}>{scannedData}</Text>
-              <ScrollView contentContainerStyle={styles.imagePreviewContainer} horizontal>
-                {imageUris.map((uri, index) => (
-                  <TouchableOpacity key={index} onPress={() => handleRemoveImage(index)}>
-                    <RNImage
-                      source={{ uri }}
-                      style={styles.imagePreview}
-                    />
-                  </TouchableOpacity>
-                ))}
-                {imageUris.length === 0 && (
-                  <TouchableOpacity style={styles.ImagePick} onPress={handleImagePick}>
-                    <RNImage
-                      source={require("../../assets/addpic.png")}
-                    />
-                  </TouchableOpacity>
-                )}
-              </ScrollView>
+            </View>
+          </Modal>        
 
-        <Text style={styles.additionalLabel}>เลือกค่าเพิ่มเติม</Text>  
-        <View style={styles.checkboxContainer}>
-          <CheckBox
-            title="QC"
-            checked={qcChecked}
-            onPress={() => setQcChecked(!qcChecked)}
-            containerStyle={styles.checkbox}
-            textStyle={styles.checkboxText}
-            checkedIcon={
-              <View style={styles.checkedIcon}>
-                <Text style={styles.iconText}>✔</Text>
-              </View>
-            }
-            uncheckedIcon={<View style={styles.uncheckedIcon} />}
-          />
-          <CheckBox
-            title="ตีลัง"
-            checked={tilangChecked}
-            onPress={() => setTilangChecked(!tilangChecked)}
-            containerStyle={styles.checkbox}
-            textStyle={styles.checkboxText}
-            checkedIcon={
-              <View style={styles.checkedIcon}>
-                <Text style={styles.iconText}>✔</Text>
-              </View>
-            }
-            uncheckedIcon={<View style={styles.uncheckedIcon} />}
-          />
-        </View>
-
-
-        <View style={styles.dimensionInputContainer}>
-        <View style={styles.dimensionInputWrapper}>
-          <TextInput
-            style={styles.dimensionInput}
-            placeholder="กว้าง (เซนติเมตร)"
-            placeholderTextColor="#000"
-            value={Fwidth ? Fwidth.toString() : ''}
-            onChangeText={(text) => setWidth(parseFloat(text))}
-            keyboardType="numeric"
-          />
-        </View>
-        <View style={styles.dimensionInputWrapper}>
-          <TextInput
-            style={styles.dimensionInput}
-            placeholder="ยาว (เซนติเมตร)"
-            placeholderTextColor="#000"
-            value={Flength ? Flength.toString() : ''}
-            onChangeText={(text) => setLength(parseFloat(text))}
-            keyboardType="numeric"
-          />
-        </View>
-      </View>
-      <View style={styles.dimensionInputContainer}>
-        <View style={styles.dimensionInputWrapper}>
-          <TextInput
-            style={styles.dimensionInput}
-            placeholder="สูง (เซนติเมตร)"
-            placeholderTextColor="#000"
-            value={Fheight ? Fheight.toString() : ''}
-            onChangeText={(text) => setHeight(parseFloat(text))}
-            keyboardType="numeric"
-          />
-        </View>
-        <View style={styles.dimensionInputWrapper}>
-          <TextInput
-            style={styles.dimensionInput}
-            placeholder="น้ำหนัก (กิโลกรัม)"
-            placeholderTextColor="#000"
-            value={Fweight ? Fweight.toString() : ''}
-            onChangeText={(text) => setWeight(parseFloat(text))}
-            keyboardType="numeric"
-          />
-        </View>
-      </View>
-      <View style={styles.dimensionInputContainer}>
-        <View style={styles.dimensionInputWrapper}>
-          <TextInput
-            style={styles.dimensionInput}
-            placeholder="ค่า QC"
-            placeholderTextColor="#000"
-            value={Fqc ? Fqc.toString() : ''}
-            onChangeText={(text) => setQc(parseFloat(text))}
-            keyboardType="numeric"
-          />
-        </View>
-        <View style={styles.dimensionInputWrapper}>
-          <TextInput
-            style={styles.dimensionInput}
-            placeholder="ค่า ตีลัง"
-            placeholderTextColor="#000"
-            value={Fbox ? Fbox.toString() : ''}
-            onChangeText={(text) => setBox(parseFloat(text))}
-            keyboardType="numeric"
-          />
-        </View>
-      </View>
-      <View style={styles.dimensionInputContainer}>
-        <View style={styles.dimensionInputWrapper}>
-          <TextInput
-            style={styles.dimensionInput}
-            placeholder="หมายเลขตู้"
-            placeholderTextColor="#000"
-            value={FcontainerNumber ? FcontainerNumber.toString() : ''}
-            onChangeText={(text) => setContainerNumber(text)}
-          />
-        </View>
-      </View>
-      <View style={styles.dimensionInputContainer}>
-        <View style={styles.dimensionInputWrapper}>        
-        <TextInput
-            style={styles.dimensionInput2}
-            placeholder="หมายเหตุ"
-            placeholderTextColor="#000"
-            value={Fnote !== null ? Fnote : ''}
-            onChangeText={setNote}
-            multiline={true} 
-          />
-        </View>
-      </View>
-
-     <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-       <Text style={styles.submitButtonText}>ตกลง</Text>
-     </TouchableOpacity>
-   </View>
- </Modal>        
-            
           ) : type === "Thai" ? (
           <Modal
             animationType="slide"
